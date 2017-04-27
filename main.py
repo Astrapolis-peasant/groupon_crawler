@@ -11,36 +11,36 @@ def handle_response(url, link_set,failed_links):
 	result = []
 	for i in lst:
 		link = i.contents[1]['href']
-		try:
-			ori_price = i.contents[1].contents[1].contents[3].find_all(class_='cui-price-original c-txt-gray-dk ')[0].contents[0]
-			dis_priec = i.contents[1].contents[1].contents[3].find_all(class_='cui-price-discount c-txt-price ')[0].contents[0]
-			company_name = i.contents[1].contents[1].contents[3].contents[3].contents[0].split('\n')[1].strip()
-			content = i.contents[1].contents[1].contents[3].contents[1].contents[0].split('\n')[1].strip()
-			
-		    
-			browser.get(link) #emulate chrome to browse the page
-			soup = BeautifulSoup(browser.page_source)
-			contacts = set(zip([i.contents[0].split('\n')[1].strip() for i in soup.find_all(class_='address-content')],\
-			    [i.contents[0].split('\n')[1].strip() for i in soup.find_all(class_='address-phone')]))
+		if link not in link_set:
+			try:
+				ori_price = i.contents[1].contents[1].contents[3].find_all(class_='cui-price-original c-txt-gray-dk ')[0].contents[0]
+				dis_priec = i.contents[1].contents[1].contents[3].find_all(class_='cui-price-discount c-txt-price ')[0].contents[0]
+				company_name = i.contents[1].contents[1].contents[3].contents[3].contents[0].split('\n')[1].strip()
+				content = i.contents[1].contents[1].contents[3].contents[1].contents[0].split('\n')[1].strip()
+				
+			    
+				browser.get(link) #emulate chrome to browse the page
+				soup = BeautifulSoup(browser.page_source)
+				contacts = set(zip([i.contents[0].split('\n')[1].strip() for i in soup.find_all(class_='address-content')],\
+				    [i.contents[0].split('\n')[1].strip() for i in soup.find_all(class_='address-phone')]))
 
-			if link not in link_set:
+				# if link not in link_set:
 				links_set.add(link)
 				record = zip([ori_price, dis_priec, company_name, content, link, list(contacts)])
 				result.append(record)
 				print len(links_set), "scrped"
-
-			else:
-				print "page scraped before"
-		except:
-			print url
-			failed_links.append(link)
+			except:
+				print url
+				failed_links.append(link)
+		else:
+			print "page scraped before"
 
 	return result
 
 if __name__ == "__main__":
 	reload(sys)
 	sys.setdefaultencoding('utf8')
-	lst_urls = ['https://www.groupon.com/browse/new-york?category=health-and-fitness&category2=sports&page={}'.format(i) for i in range(1,17)] 
+	lst_urls = ['https://www.groupon.com/browse/new-york?category=health-and-fitness&category2=sports&page={}'.format(i) for i in range(1,17)] #change category and location for scraping
 	links_set = set(list())
 	old_len = 0
 	new_len = 1
